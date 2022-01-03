@@ -2,7 +2,7 @@ import Homepage from "./Components/Homepage/Homepage.js";
 import Registration from "./Components/Registration/Registration.js";
 import Dashboard from "./Components/Dashboard/Dashboard.js";
 import Header from "./Components/Header.js";
-
+import  "./App.css"
 import { Route, Routes } from "react-router-dom";
 
 function App() {
