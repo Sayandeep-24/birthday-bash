@@ -1,5 +1,5 @@
 import FormInput from './FormInput.js'
-import DisplayData from './DisplayData.js'
+import FetchData from './FetchData.js'
 
 export default function Dashboard()
 {
@@ -7,6 +7,6 @@ export default function Dashboard()
     <div>
         <div>Add Friend</div>
         <FormInput/>
-        <DisplayData/>
+        <FetchData />
     </div>);
 }

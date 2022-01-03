@@ -1,13 +1,30 @@
 import { Form, Button } from "semantic-ui-react";
 import { Controller, useForm } from "react-hook-form";
-import ReactPhoneInput, { isValidPhoneNumber } from "react-phone-input-2";
-
+import moment from "moment";
+import PhoneInputWithCountry, {
+  isValidPhoneNumber,
+} from "react-phone-number-input";
+import "react-phone-number-input/style.css";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { useState } from "react";
+import db from "../../firebase-config.js";
+import { collection, addDoc } from "firebase/firestore";
 
 export default function FormInput() {
-  const {register,handleSubmit,formState: { errors },control} = useForm();
-  const onSubmit = (data) => {
-    console.log(data);
+
+  const { register, handleSubmit, formState: { errors }, control,} = useForm();
+
+  const onSubmit = (data, e ) => {
+    setFormData(data);
+    try {
+      addDoc(collection(db, "users"), data);
+    } catch (e) {
+      console.error("Error adding document: ", e);
+    }
+    e.target.reset();
   };
+  const [formData, setFormData] = useState();
   return (
     <div>
       <Form onSubmit={handleSubmit(onSubmit)}>
@@ -41,7 +58,24 @@ export default function FormInput() {
             })}
           />
         </Form.Field>
-        {errors.lastName && <p>Please check the Email</p>}
+        {errors.email && <p>Please check the Email</p>}
+        <Form.Field>
+          <label htmlFor="dob">Date of Birth</label>
+          <Controller
+            control={control}
+            name="dob"
+            render={({ field }) => (
+              <DatePicker
+                placeholderText="Select date"
+                onChange={(date) => field.onChange(date)}
+                selected={moment().toDate()}
+                maxDate={moment().toDate()}
+              />
+            )}
+          />
+        </Form.Field>
+        {errors.dob && <p>Please check the date of birth</p>}
+
         <Form.Field>
           <label>Address</label>
           <input
@@ -52,25 +86,27 @@ export default function FormInput() {
         </Form.Field>
         {errors.address && <p>Please check the Address</p>}
         <Form.Field>
-        <Controller
-          control={control}
-          name="phone"
-          rules={{ required: true, validate: (value) => isValidPhoneNumber(value) }}
-          render={({ field: { ref, ...field } }) => (
-            <ReactPhoneInput
-              {...field}
-              inputExtraProps={{
-                ref,
-                required: true,
-                autoFocus: true,
-              }}
-              country={"in"}
-              onlyCountries={["in"]}
-              countryCodeEditable={true}
-              specialLabel={"Mobile Number"}
-            />
-          )}
-        />
+          <label htmlFor="phone">Phone Number</label>
+          <Controller
+            name="phone"
+            control={control}
+            rules={{
+              required: true,
+              validate: (value) => isValidPhoneNumber(value),
+            }}
+            render={({ field: { onChange, value } }) => (
+              <PhoneInputWithCountry
+                inputExtraProps={{
+                  name: "phone",
+                  required: true,
+                  autoFocus: true,
+                }}
+                value={value}
+                onChange={onChange}
+                defaultCountry={"IN"}
+              />
+            )}
+          />
         </Form.Field>
         {errors.phone && <p>Please check the Phone number</p>}
 
@@ -85,24 +121,25 @@ export default function FormInput() {
         {errors.state && <p>Please check the State</p>}
         <Form.Field>
           <label>Size(in pounds) </label>
-          <input placeholder="Size" type="number" {...register("Size", { required : true, min : 1, max : 10})} />
+          <input
+            placeholder="Size"
+            type="number"
+            {...register("Size", { required: true, min: 1, max: 10 })}
+          />
         </Form.Field>
-        {errors.Size && <p>Please check the size of cake, cannot be more than 10 pounds</p>}
+        {errors.Size && (
+          <p>Please check the size of cake, cannot be more than 10 pounds</p>
+        )}
         <Form.Field>
-        <label htmlFor="flavour" >
-            Select flavour of Cake
-          </label>
-          <select
-            name="flavour"
-            {...register("flavour", { required : true})}
-          >
+          <label htmlFor="flavour">Select flavour of Cake</label>
+          <select name="flavour" {...register("flavour", { required: true })}>
             <option value="" />
             <option value="Vanilla">Vanilla</option>
             <option value="Chocolate">Chocolate </option>
             <option value="Butterscotch">Butterscotch </option>
           </select>
-          </Form.Field>
-          {errors.flavour && <p>Please check the flavour of the cake</p>}
+        </Form.Field>
+        {errors.flavour && <p>Please check the flavour of the cake</p>}
         <Button type="submit">Submit</Button>
       </Form>
     </div>
