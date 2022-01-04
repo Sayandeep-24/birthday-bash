@@ -1,5 +1,8 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect } from "react";
+import db from "../../firebase-config";
 import Table from "./Table";
+import { doc, deleteDoc } from "firebase/firestore";
+
 
 export default function DisplayData(props) {
   const columns = useMemo(
@@ -54,10 +57,10 @@ export default function DisplayData(props) {
             }}
             onClick={() => {
               const dataCopy = [...props.data];
-              console.log(dataCopy[tableProps.row.index]);
+              let id = (dataCopy[tableProps.row.index]).key;
+              deleteDoc(doc(db, "users", id));
               dataCopy.splice(tableProps.row.index, 1);
               props.changer(dataCopy);
-              
             }}
           >
             Delete
@@ -67,7 +70,6 @@ export default function DisplayData(props) {
     ],
     [props]
   );
-
   return (
     <div>
       <Table columns={columns} data={props.data} />
